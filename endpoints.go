@@ -11,4 +11,6 @@ const (
 	SubscriptionBaseSizeEndpointLive  = "https://api.dialog.lk/subscription/query-base"
 	SubscriptionStatusEndpointLocal   = "http://localhost:7000/subscription/getStatus"
 	SubscriptionStatusEndpointLive    = "https://api.dialog.lk/subscription/getStatus"
+	CaaSQueryBalanceEndpointLocal     = "http://localhost:7000/caas/get/balance"
+	CaaSQueryBalanceEndpointLive      = "https://api.dialog.lk/caas/get/balance"
 )

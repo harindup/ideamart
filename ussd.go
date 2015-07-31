@@ -79,6 +79,26 @@ func newUSSDSession(id, remoteAddr string) USSDSession {
 	}
 }
 
+func (client *USSDClient) sendHandlerResponse(session *USSDSession, ussdReq USSDMobileOriginatedRequest) {
+	response, responseType, err := client.MessageHandler.HandleMessage(session.RemoteAddress, ussdReq.Message, ussdReq.USSDOperation, session.SessionData)
+	ussdResp := USSDMobileTerminatedRequest{
+		ApplicationID:      client.ApplicationID,
+		Password:           client.Password,
+		Message:            response,
+		SessionID:          session.ID,
+		USSDOperation:      responseType,
+		DestinationAddress: session.RemoteAddress,
+	}
+	resp := USSDMobileTerminatedResponse{}
+	err = doRequest(client.SendEndpoint, ussdResp, &resp)
+	if err != nil {
+		log.Print(err)
+	}
+	if resp.StatusCode != StatusCodeSuccess {
+		log.Print(apiErrorFromCode(resp.StatusCode), resp)
+	}
+}
+
 func (client *USSDClient) HandleIncoming(res http.ResponseWriter, req *http.Request) {
 	ussdReq := USSDMobileOriginatedRequest{}
 	err := unmarshalRequest(req, &ussdReq)
@@ -97,21 +117,5 @@ func (client *USSDClient) HandleIncoming(res http.ResponseWriter, req *http.Requ
 		sendSuccessResponse(res)
 	}
 	req.Body.Close()
-	response, responseType, err := client.MessageHandler.HandleMessage(session.RemoteAddress, ussdReq.Message, ussdReq.USSDOperation, session.SessionData)
-	ussdResp := USSDMobileTerminatedRequest{
-		ApplicationID:      client.ApplicationID,
-		Password:           client.Password,
-		Message:            response,
-		SessionID:          session.ID,
-		USSDOperation:      responseType,
-		DestinationAddress: session.RemoteAddress,
-	}
-	resp := USSDMobileTerminatedResponse{}
-	err = doRequest(client.SendEndpoint, ussdResp, &resp)
-	if err != nil {
-		log.Print(err)
-	}
-	if resp.StatusCode != StatusCodeSuccess {
-		log.Print(apiErrorFromCode(resp.StatusCode), resp)
-	}
+	go client.sendHandlerResponse(session, ussdReq)
 }

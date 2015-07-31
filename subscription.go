@@ -14,7 +14,7 @@ const (
 	version                       = "1.0"
 	subscribeAction               = "1"
 	unsubscribeAction             = "0"
-	subscriptionTimestampFormat   = "060102150405"
+	subscriptionTimestampFormat   = "20060102150405"
 )
 
 type SubscriptionClient struct {
@@ -77,11 +77,7 @@ type SubscriptionNotification struct {
 }
 
 func parseSubscriptionTimestamp(value string) time.Time {
-	loc, err := time.LoadLocation("Asia/Colombo")
-	if err != nil {
-		panic("Failed to load time zone info. Please check TZData.")
-	}
-	t, err := time.ParseInLocation(subscriptionTimestampFormat, value, loc)
+	t, err := time.ParseInLocation(subscriptionTimestampFormat, value, timestampLocation)
 	if err != nil {
 		log.Print("Error in parsing SMS timestamp: ", value, err)
 	}
@@ -149,5 +145,5 @@ func (client *SubscriptionClient) HandleSubscriptionNotification(res http.Respon
 		sendSuccessResponse(res)
 	}
 	req.Body.Close()
-	client.SubscriptionStatusCallback(notification.SubscriberID, notification.Status, parseSubscriptionTimestamp(notification.Timestamp))
+	go client.SubscriptionStatusCallback(notification.SubscriberID, notification.Status, parseSubscriptionTimestamp(notification.Timestamp))
 }

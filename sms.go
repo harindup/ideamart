@@ -67,11 +67,7 @@ type SMSDeliveryReport struct {
 }
 
 func parseSMSTimestamp(value string) time.Time {
-	loc, err := time.LoadLocation("Asia/Colombo")
-	if err != nil {
-		panic("Failed to load time zone info. Please check TZData.")
-	}
-	t, err := time.ParseInLocation(smsTimestampFormat, value, loc)
+	t, err := time.ParseInLocation(smsTimestampFormat, value, timestampLocation)
 	if err != nil {
 		log.Print("Error in parsing SMS timestamp: ", value, err)
 	}
@@ -171,5 +167,5 @@ func (client *SMSClient) HandleDeliveryReport(res http.ResponseWriter, req *http
 	}
 	req.Body.Close()
 	report.Timestamp = parseSMSTimestamp(report.RawTimestamp)
-	client.DeliveryStatusCallback(report.MessageID, report.DestinationAddress, report.DeliveryStatus, report.Timestamp)
+	go client.DeliveryStatusCallback(report.MessageID, report.DestinationAddress, report.DeliveryStatus, report.Timestamp)
 }
