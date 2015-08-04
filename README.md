@@ -1,4 +1,4 @@
-Go Ideamart client
+Go Ideamart Client
 ==================
 
 A client library for the [Dialog Ideamart APIs](http://www.ideamart.lk/idea-pro) written in [Go](https://golang.org/).
