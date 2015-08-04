@@ -3,15 +3,13 @@ Go Ideamart client
 
 A client library for the [Dialog Ideamart API](http://www.ideamart.lk/idea-pro) written in [Go](https://golang.org/)
 
-Supported APIs
---------------
+## Supported APIs
   - USSD
   - SMS
   - CaaS
   - Subscription
 
- LICENSE
- -------
+ ## LICENSE
 
  ### The MIT License (MIT)
 
