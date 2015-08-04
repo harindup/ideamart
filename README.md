@@ -5,10 +5,10 @@ A client library for the [Dialog Ideamart API](http://www.ideamart.lk/idea-pro) 
 
 Supported APIs
 --------------
- - USSD (no mobile terminated sessions)
- - SMS
- - CaaS (partial)
- - Subscription
+  - USSD (no mobile terminated sessions)
+  - SMS
+  - CaaS (partial)
+  - Subscription
 
  LICENSE
  -------
