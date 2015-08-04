@@ -4,10 +4,10 @@ Go Ideamart client
 A client library for the [Dialog Ideamart APIs](http://www.ideamart.lk/idea-pro) written in [Go](https://golang.org/)
 
 ## Supported APIs
-  - USSD
-  - SMS
-  - CaaS
-  - Subscription
+ USSD
+ SMS
+ CaaS
+ Subscription
 
  ## LICENSE
 
