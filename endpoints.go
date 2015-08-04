@@ -1,5 +1,6 @@
 package ideamart
 
+// Endpoint constants.
 const (
 	USSDSendEndpointLocal             = "http://localhost:7000/ussd/send"
 	USSDSendEndpointLive              = "https://api.dialog.lk/ussd/send"

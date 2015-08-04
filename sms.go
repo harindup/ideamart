@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	// SMS delivery status codes from Ideamart.
 	SMSStatusSent          = "SENT"
 	SMSStatusDelivered     = "DELIVERED"
 	SMSStatusExpired       = "EXPIRED"
@@ -16,9 +17,12 @@ const (
 	SMSStatusAccepted      = "ACCEPTED"
 	SMSStatusUnknown       = "UNKNOWN"
 	SMSStatusRejected      = "REJECTED"
-	smsTimestampFormat     = "0601021504"
+
+	smsTimestampFormat = "0601021504"
 )
 
+// The SMS client.
+// DeliveryStatusCallback is called to notify a delivery.
 type SMSClient struct {
 	ApplicationID          string
 	Password               string
@@ -157,6 +161,7 @@ func (client *SMSClient) SendTextMessage(message string, recipients []string, ch
 	return client.sendSMS(smsReq, recipients)
 }
 
+// This method should be attached as the handler for the delivery report endpoint.
 func (client *SMSClient) HandleDeliveryReport(res http.ResponseWriter, req *http.Request) {
 	report := SMSDeliveryReport{}
 	err := unmarshalRequest(req, &report)

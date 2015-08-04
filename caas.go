@@ -1,23 +1,20 @@
 package ideamart
 
 import (
-	//"log"
-	//"net/http"
 	"strconv"
 	"time"
 )
 
 const (
 	CaaSMobileAccount = "MobileAccount"
-	//subscriptionTimestampFormat = "20060102150405"
 )
 
+// CaasS Client.
 type CaaSClient struct {
-	ApplicationID              string
-	Password                   string
-	BalanceEndpoint            string
-	DirectDebitEndpoint        string
-	SubscriptionStatusCallback func(subscriberId, status string, timestamp time.Time)
+	ApplicationID       string
+	Password            string
+	BalanceEndpoint     string
+	DirectDebitEndpoint string
 }
 
 type CaaSBalanceRequest struct {

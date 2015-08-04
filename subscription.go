@@ -8,15 +8,19 @@ import (
 )
 
 const (
+	// The Subscriber status codes returned by Ideamart API.
 	SubscriberStatusRegistered    = "REGISTERED"
 	SubscriberStatusUnregistered  = "UNREGISTERED"
 	SubscriberStatusPendingCharge = "PENDING CHARGE"
-	version                       = "1.0"
-	subscribeAction               = "1"
-	unsubscribeAction             = "0"
-	subscriptionTimestampFormat   = "20060102150405"
+
+	version                     = "1.0"
+	subscribeAction             = "1"
+	unsubscribeAction           = "0"
+	subscriptionTimestampFormat = "20060102150405"
 )
 
+// The Subscription service client.
+// SubscriptionStatusCallback is called to handle Subscription notifications.
 type SubscriptionClient struct {
 	ApplicationID              string
 	Password                   string
@@ -136,6 +140,7 @@ func (client *SubscriptionClient) GetStatus(subscriberId string) (string, error)
 	return res.SubscriptionStatus, nil
 }
 
+// This method should be attached as the subscription notification endpoint handler.
 func (client *SubscriptionClient) HandleSubscriptionNotification(res http.ResponseWriter, req *http.Request) {
 	notification := SubscriptionNotification{}
 	err := unmarshalRequest(req, &notification)

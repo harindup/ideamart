@@ -6,17 +6,20 @@ import (
 	"sync"
 )
 
-type InMemorySessionStore struct {
-	MaxSize     int
+// An in-memory seession store for use with the USSD client.
+// Automatically manages "garbage collection" by keeping track of updates.
+// maxSize is the maximum number of sessions it will store before discarding the last updated session.
+type inMemorySessionStore struct {
+	maxSize     int
 	currentSize int
 	gcList      list.List
 	lock        sync.Mutex
 	store       map[string]*list.Element
 }
 
-func (s *InMemorySessionStore) deleteOldestIfFull() {
+func (s *inMemorySessionStore) deleteOldestIfFull() {
 	log.Print(s.currentSize)
-	if s.currentSize >= s.MaxSize {
+	if s.currentSize >= s.maxSize {
 		e := s.gcList.Back()
 		session := e.Value.(*USSDSession)
 		delete(s.store, session.ID)
@@ -25,7 +28,8 @@ func (s *InMemorySessionStore) deleteOldestIfFull() {
 	}
 }
 
-func (s *InMemorySessionStore) Get(id string) *USSDSession {
+// Gets an USSD session by id. Returns nil if none exists.
+func (s *inMemorySessionStore) Get(id string) *USSDSession {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	e := s.store[id]
@@ -41,7 +45,8 @@ func (s *InMemorySessionStore) Get(id string) *USSDSession {
 	return nil
 }
 
-func (s *InMemorySessionStore) Save(session USSDSession) {
+// Saves a new USSD session. Removes the "oldest" to make space if insufficient.
+func (s *inMemorySessionStore) Save(session USSDSession) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.deleteOldestIfFull()
@@ -52,6 +57,12 @@ func (s *InMemorySessionStore) Save(session USSDSession) {
 	s.store[session.ID] = s.gcList.Front()
 }
 
-func NewInMemorySessionStore(maxSize int) InMemorySessionStore {
-	return InMemorySessionStore{MaxSize: maxSize, store: map[string]*list.Element{}}
+func (s *inMemorySessionStore) MaxSize() int {
+	return s.maxSize
+}
+
+// Returns a properly initialized in-memory sessions store.
+// maxSize is the maximum number of sessions it will store before discarding the "oldest" session.
+func NewInMemorySessionStore(maxSize int) inMemorySessionStore {
+	return inMemorySessionStore{maxSize: maxSize, store: map[string]*list.Element{}}
 }

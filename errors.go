@@ -2,6 +2,9 @@ package ideamart
 
 import "fmt"
 
+// Ideamart Error type.
+// Type is either ApiError, ClientError or UnknownError.
+// Retryable is a boolean value which gives whether the same request can be retied after the error.
 type Error struct {
 	Type        string
 	Code        string

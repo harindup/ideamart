@@ -10,6 +10,7 @@ type MobileOriginatedUSSDOperation string
 
 const (
 	//MobileTermiatedInitial  MobileTerminatedUSSDOperation = "mt-init"
+
 	MobileTermiatedFinal    MobileOriginatedUSSDOperation = "mt-fin"
 	MobileTermiatedContinue MobileTerminatedUSSDOperation = "mt-cont"
 
@@ -52,17 +53,17 @@ type USSDSessionStore interface {
 	Save(USSDSession)
 }
 
-type USSDMessageHandler interface {
-	HandleMessage(address, message string, operation MobileOriginatedUSSDOperation, sessionData map[string]interface{}) (response string, responseType MobileTerminatedUSSDOperation, err error)
-}
-
+// The USSD client.
+// SessionStore should implement the interface USSDSessionStore.
+// The provided inMemorySessionStore can be used for this.
+// IncomingMessageHandlerFunc is called to get the response to a USSD message.
 type USSDClient struct {
-	ApplicationID  string
-	Password       string
-	SendEndpoint   string
-	RetryCount     int
-	SessionStore   USSDSessionStore
-	MessageHandler USSDMessageHandler
+	ApplicationID              string
+	Password                   string
+	SendEndpoint               string
+	RetryCount                 int
+	SessionStore               USSDSessionStore
+	IncomingMessageHandlerFunc func(address, message string, operation MobileOriginatedUSSDOperation, sessionData map[string]interface{}) (response string, responseType MobileTerminatedUSSDOperation, err error)
 }
 
 type USSDSession struct {
@@ -80,7 +81,7 @@ func newUSSDSession(id, remoteAddr string) USSDSession {
 }
 
 func (client *USSDClient) sendHandlerResponse(session *USSDSession, ussdReq USSDMobileOriginatedRequest) {
-	response, responseType, err := client.MessageHandler.HandleMessage(session.RemoteAddress, ussdReq.Message, ussdReq.USSDOperation, session.SessionData)
+	response, responseType, err := client.IncomingMessageHandlerFunc(session.RemoteAddress, ussdReq.Message, ussdReq.USSDOperation, session.SessionData)
 	ussdResp := USSDMobileTerminatedRequest{
 		ApplicationID:      client.ApplicationID,
 		Password:           client.Password,
@@ -99,6 +100,7 @@ func (client *USSDClient) sendHandlerResponse(session *USSDSession, ussdReq USSD
 	}
 }
 
+// This method should be attached as the handler to the USSD receiving endpoint of the server.
 func (client *USSDClient) HandleIncoming(res http.ResponseWriter, req *http.Request) {
 	ussdReq := USSDMobileOriginatedRequest{}
 	err := unmarshalRequest(req, &ussdReq)
