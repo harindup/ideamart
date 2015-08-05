@@ -11,7 +11,7 @@ type MobileOriginatedUSSDOperation string
 const (
 	//MobileTermiatedInitial  MobileTerminatedUSSDOperation = "mt-init"
 
-	MobileTermiatedFinal    MobileOriginatedUSSDOperation = "mt-fin"
+	MobileTermiatedFinal    MobileTerminatedUSSDOperation = "mt-fin"
 	MobileTermiatedContinue MobileTerminatedUSSDOperation = "mt-cont"
 
 	MobileOriginatedInitial  MobileOriginatedUSSDOperation = "mo-init"
