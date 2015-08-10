@@ -1,7 +1,7 @@
 Go Ideamart Client
 ==================
 
-A client library for the [Dialog Ideamart APIs](http://www.ideamart.lk/idea-pro) written in [Go](https://golang.org/).
+A high-level client library for the [Dialog Ideamart APIs](http://www.ideamart.lk/idea-pro) written in [Go](https://golang.org/).
 
 Supported APIs
 --------------
@@ -14,6 +14,7 @@ Additional Features
 -------------------
 * USSD session handler with support for custom sessions stores.
 * An in-memory USSD session store with built-in garbage collection.
+* An SMS queue with auto request rate throttling and auto-retrying.
 
 LICENSE
 -------
