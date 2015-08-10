@@ -1,5 +1,10 @@
 package ideamart
 
+/*
+	The SMS client.
+	Only sending is currently supported.
+*/
+
 import (
 	"fmt"
 	"log"
@@ -111,9 +116,9 @@ func formatDestinationResponses(responses []SMSDestinationResponse) {
 	}
 }
 
-func (client *SMSClient) sendSMS(sms SMSSendRequest, recipients []string) ([]SMSDestinationResponse, []string, error) {
-	destResps := []SMSDestinationResponse{}
-	failures := []string{}
+func (client *SMSClient) sendSMS(sms SMSSendRequest, recipients []string) (destResps []SMSDestinationResponse, failures []string, err error) {
+	destResps = []SMSDestinationResponse{}
+	failures = []string{}
 	c := len(recipients) / client.MaxAddressCount
 	for i := 0; i <= c; i++ {
 		f := i * client.MaxAddressCount
@@ -144,7 +149,7 @@ func (client *SMSClient) sendSMS(sms SMSSendRequest, recipients []string) ([]SMS
 	return destResps, failures, nil
 }
 
-func (client *SMSClient) SendTextMessage(message string, recipients []string, chargingAmount float32, requestDeliveryReports bool) ([]SMSDestinationResponse, []string, error) {
+func (client *SMSClient) SendTextMessage(message string, recipients []string, chargingAmount float32, requestDeliveryReports bool) (destResps []SMSDestinationResponse, failures []string, err error) {
 	smsReq := SMSSendRequest{
 		ApplicationID: client.ApplicationID,
 		Password:      client.Password,

@@ -1,5 +1,9 @@
 package ideamart
 
+/*
+	In-memory USSD session store to be used with the client.
+*/
+
 import (
 	"container/list"
 	"log"
