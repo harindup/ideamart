@@ -8,16 +8,15 @@ import (
 type MobileTerminatedUSSDOperation string
 type MobileOriginatedUSSDOperation string
 
+// USSD Operation type contants
 const (
-	//MobileTermiatedInitial  MobileTerminatedUSSDOperation = "mt-init"
-
 	MobileTermiatedFinal    MobileTerminatedUSSDOperation = "mt-fin"
 	MobileTermiatedContinue MobileTerminatedUSSDOperation = "mt-cont"
 
 	MobileOriginatedInitial  MobileOriginatedUSSDOperation = "mo-init"
 	MobileOriginatedContinue MobileOriginatedUSSDOperation = "mo-cont"
 
-	StatusCodeSuccess string = "S1000"
+	statusCodeSuccess string = "S1000"
 )
 
 type USSDMobileTerminatedRequest struct {
@@ -95,7 +94,7 @@ func (client *USSDClient) sendHandlerResponse(session *USSDSession, ussdReq USSD
 	if err != nil {
 		log.Print(err)
 	}
-	if resp.StatusCode != StatusCodeSuccess {
+	if resp.StatusCode != statusCodeSuccess {
 		log.Print(apiErrorFromCode(resp.StatusCode), resp)
 	}
 }

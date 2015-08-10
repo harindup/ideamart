@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// CaaS Subscriber account types
 const (
 	CaaSMobileAccount = "MobileAccount"
 )

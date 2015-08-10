@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// SMS delivery status codes from Ideamart.
+	// SMS delivery status codes from Ideamart
 	SMSStatusSent          = "SENT"
 	SMSStatusDelivered     = "DELIVERED"
 	SMSStatusExpired       = "EXPIRED"

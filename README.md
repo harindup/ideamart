@@ -48,11 +48,11 @@ Usage
 --
     import "github.com/harindup/ideamart"
 
-### Endpoint constants
+### Constants
 
 ```go
 const (
-    USSDSendEndpointLocal             = "http://localhost:7000/ussd/send"
+	USSDSendEndpointLocal             = "http://localhost:7000/ussd/send"
 	USSDSendEndpointLive              = "https://api.dialog.lk/ussd/send"
 	SMSSendEndpointLocal              = "http://localhost:7000/sms/send"
 	SMSSendEndpointLive               = "https://api.dialog.lk/sms/send"
@@ -66,8 +66,8 @@ const (
 	CaaSQueryBalanceEndpointLive      = "https://api.dialog.lk/caas/get/balance"
 )
 ```
+Endpoint constants
 
-### Error types
 ```go
 const (
 	TypeAPIError     = "ApiError"
@@ -76,9 +76,9 @@ const (
 )
 ```
 
-### SMS delivery status codes from Ideamart
 ```go
 const (
+	// SMS delivery status codes from Ideamart
 	SMSStatusSent          = "SENT"
 	SMSStatusDelivered     = "DELIVERED"
 	SMSStatusExpired       = "EXPIRED"
@@ -90,9 +90,9 @@ const (
 )
 ```
 
-###The Subscriber status codes returned by Ideamart API
 ```go
 const (
+	// The Subscriber status codes returned by Ideamart API.
 	SubscriberStatusRegistered    = "REGISTERED"
 	SubscriberStatusUnregistered  = "UNREGISTERED"
 	SubscriberStatusPendingCharge = "PENDING CHARGE"
@@ -106,18 +106,19 @@ const (
 
 	MobileOriginatedInitial  MobileOriginatedUSSDOperation = "mo-init"
 	MobileOriginatedContinue MobileOriginatedUSSDOperation = "mo-cont"
-
-	StatusCodeSuccess string = "S1000"
 )
 ```
+USSD Operation type contants
 
 ```go
 const (
 	CaaSMobileAccount = "MobileAccount"
 )
 ```
+CaaS Subscriber account types
 
-### Error codes returned by the Ideamart API
+### Errors
+
 ```go
 var (
 	ErrAuthFailed           = Error{TypeAPIError, "E1313", "Authentication failed", false}
@@ -621,4 +622,3 @@ type USSDSessionStore interface {
 	Save(USSDSession)
 }
 ```
-

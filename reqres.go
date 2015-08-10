@@ -17,7 +17,7 @@ type Response struct {
 }
 
 const (
-	ContentType string = "application/json"
+	contentType string = "application/json"
 )
 
 var (
@@ -50,7 +50,7 @@ func sendSuccessResponse(res http.ResponseWriter) {
 		res.WriteHeader(500)
 		return
 	}
-	res.Header().Add("Content-Type", ContentType)
+	res.Header().Add("Content-Type", contentType)
 	res.Write(resBody)
 	return
 }
@@ -64,7 +64,7 @@ func doRequest(endpoint string, request interface{}, response interface{}) error
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post(endpoint, ContentType, bytes.NewReader(reqBody))
+	resp, err := http.Post(endpoint, contentType, bytes.NewReader(reqBody))
 	if err != nil {
 		return err
 	}
