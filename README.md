@@ -14,7 +14,7 @@ Additional Features
 -------------------
 * USSD session handler with support for custom sessions stores.
 * An in-memory USSD session store with built-in garbage collection.
-* An SMS queue with auto request rate throttling and auto-retrying.
+* An SMS queue with built-in request rate throttling and auto-retrying.
 
 LICENSE
 -------
