@@ -83,6 +83,24 @@ func parseSMSTimestamp(value string) time.Time {
 	return t
 }
 
+func splitAddrSlice(addresses []string, maxSize int) [][]string {
+	slices := [][]string{}
+	c := len(addresses) / maxSize
+	for i := 0; i <= c; i++ {
+		f := i * maxSize
+		l := f + maxSize
+		if i == c {
+			if f == len(addresses) {
+				break
+			} else {
+				l = len(addresses)
+			}
+		}
+		slices = append(slices, addresses[f:l])
+	}
+	return slices
+}
+
 func (request *SMSSendRequest) sendWithRetries(endpoint string, retryCount int) ([]SMSDestinationResponse, error) {
 	resp := SMSSendResponse{}
 	for c := 0; c < retryCount; c++ {
@@ -119,21 +137,12 @@ func formatDestinationResponses(responses []SMSDestinationResponse) {
 func (client *SMSClient) sendSMS(sms SMSSendRequest, recipients []string) (destResps []SMSDestinationResponse, failures []string, err error) {
 	destResps = []SMSDestinationResponse{}
 	failures = []string{}
-	c := len(recipients) / client.MaxAddressCount
-	for i := 0; i <= c; i++ {
-		f := i * client.MaxAddressCount
-		l := f + client.MaxAddressCount
-		if i == c {
-			if f == len(recipients) {
-				break
-			} else {
-				l = len(recipients)
-			}
-		}
-		sms.DestinationAddresses = recipients[f:l]
+	addressBlocks := splitAddrSlice(recipients, client.MaxAddressCount)
+	for _, block := range addressBlocks {
+		sms.DestinationAddresses = block
 		d, err := sms.sendWithRetries(client.SendEndpoint, client.RetryCount)
 		if err != nil {
-			failures = append(failures, recipients[f:l]...)
+			failures = append(failures, block...)
 		}
 		for _, r := range d {
 			if r.Sent {

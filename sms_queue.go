@@ -31,14 +31,23 @@ type smsQueue struct {
 func (q *smsQueue) EnqueueMessage(message string, recipients []string, chargingAmount float32, reportDelivery bool) {
 	go func() {
 		m := smsMessage{message, recipients, chargingAmount, reportDelivery, 0}
-		q.channel <- m
+		q.enqueueMessage(m)
 	}()
+}
+
+func (q *smsQueue) enqueueMessage(m smsMessage) {
+	addrBlocks := splitAddrSlice(m.recipients, q.messagesPerSecond*q.client.MaxAddressCount)
+	for _, block := range addrBlocks {
+		nm := m
+		nm.recipients = block
+		q.channel <- nm
+	}
 }
 
 func (q *smsQueue) requeueMessage(m smsMessage) {
 	if m.retries < q.maxRetryCount {
 		m.retries++
-		q.channel <- m
+		q.enqueueMessage(m)
 	}
 }
 
@@ -70,13 +79,16 @@ func (q *smsQueue) Start() {
 	q.started = true
 	sentCount := 0
 	for {
-		if sentCount == q.messagesPerSecond {
+		if sentCount >= q.messagesPerSecond {
 			time.Sleep(time.Second)
 			sentCount = 0
 		}
 		m := <-q.channel
 		go q.sendMessage(m)
-		sentCount++
+		sentCount += len(m.recipients) / q.client.MaxAddressCount
+		if len(m.recipients)%q.client.MaxAddressCount != 0 {
+			sentCount++
+		}
 	}
 }
 
