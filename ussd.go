@@ -3,6 +3,7 @@ package ideamart
 import (
 	"log"
 	"net/http"
+	"time"
 )
 
 type MobileTerminatedUSSDOperation string
@@ -63,6 +64,7 @@ type USSDClient struct {
 	RetryCount                 int
 	SessionStore               USSDSessionStore
 	IncomingMessageHandlerFunc func(address, message string, operation MobileOriginatedUSSDOperation, sessionData map[string]interface{}) (response string, responseType MobileTerminatedUSSDOperation, err error)
+	LogRequestDuration         bool
 }
 
 type USSDSession struct {
@@ -79,28 +81,9 @@ func newUSSDSession(id, remoteAddr string) USSDSession {
 	}
 }
 
-func (client *USSDClient) sendHandlerResponse(session *USSDSession, ussdReq USSDMobileOriginatedRequest) {
-	response, responseType, err := client.IncomingMessageHandlerFunc(session.RemoteAddress, ussdReq.Message, ussdReq.USSDOperation, session.SessionData)
-	ussdResp := USSDMobileTerminatedRequest{
-		ApplicationID:      client.ApplicationID,
-		Password:           client.Password,
-		Message:            response,
-		SessionID:          session.ID,
-		USSDOperation:      responseType,
-		DestinationAddress: session.RemoteAddress,
-	}
-	resp := USSDMobileTerminatedResponse{}
-	err = doRequest(client.SendEndpoint, ussdResp, &resp)
-	if err != nil {
-		log.Print(err)
-	}
-	if resp.StatusCode != statusCodeSuccess {
-		log.Print(apiErrorFromCode(resp.StatusCode), resp)
-	}
-}
-
 // This method should be attached as the handler to the USSD receiving endpoint of the server.
 func (client *USSDClient) HandleIncoming(res http.ResponseWriter, req *http.Request) {
+	tBegin := time.Now()
 	ussdReq := USSDMobileOriginatedRequest{}
 	err := unmarshalRequest(req, &ussdReq)
 	var session *USSDSession
@@ -118,5 +101,26 @@ func (client *USSDClient) HandleIncoming(res http.ResponseWriter, req *http.Requ
 		sendSuccessResponse(res)
 	}
 	req.Body.Close()
-	go client.sendHandlerResponse(session, ussdReq)
+	go func() {
+		response, responseType, err := client.IncomingMessageHandlerFunc(session.RemoteAddress, ussdReq.Message, ussdReq.USSDOperation, session.SessionData)
+		ussdResp := USSDMobileTerminatedRequest{
+			ApplicationID:      client.ApplicationID,
+			Password:           client.Password,
+			Message:            response,
+			SessionID:          session.ID,
+			USSDOperation:      responseType,
+			DestinationAddress: session.RemoteAddress,
+		}
+		resp := USSDMobileTerminatedResponse{}
+		err = doRequest(client.SendEndpoint, ussdResp, &resp)
+		if err != nil {
+			log.Print(err)
+		}
+		if client.LogRequestDuration {
+			log.Printf("Request time: %v\n", time.Since(tBegin))
+		}
+		if resp.StatusCode != statusCodeSuccess {
+			log.Print(apiErrorFromCode(resp.StatusCode), resp)
+		}
+	}()
 }
