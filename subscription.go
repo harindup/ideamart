@@ -151,5 +151,5 @@ func (client *SubscriptionClient) HandleSubscriptionNotification(res http.Respon
 		sendSuccessResponse(res)
 	}
 	req.Body.Close()
-	go client.SubscriptionStatusCallback(notification.SubscriberID, notification.Status, parseSubscriptionTimestamp(notification.Timestamp))
+	go client.SubscriptionStatusCallback(subscriptionIDPrefix+notification.SubscriberID, notification.Status, parseSubscriptionTimestamp(notification.Timestamp))
 }
