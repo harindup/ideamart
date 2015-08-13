@@ -10,6 +10,7 @@ import (
 )
 
 type smsMessage struct {
+	ID             string
 	message        string
 	recipients     []string
 	chargingAmount float32
@@ -18,24 +19,24 @@ type smsMessage struct {
 }
 
 // SMS Queue with auto-retrying for retryable errors.
-type smsQueue struct {
+type SMSQueue struct {
 	channel                 chan smsMessage
 	maxRetryCount           int
 	messagesPerSecond       int
 	started                 bool
 	client                  SMSClient
-	sentMessageCallbackFunc func(smsMessage, recipient, smsMessageId string)
+	sentMessageCallbackFunc func(id, smsMessage, recipient, smsMessageId string)
 }
 
 // Enqueues a message in the SMS queue.
-func (q *smsQueue) EnqueueMessage(message string, recipients []string, chargingAmount float32, reportDelivery bool) {
+func (q *SMSQueue) EnqueueMessage(id, message string, recipients []string, chargingAmount float32, reportDelivery bool) {
 	go func() {
-		m := smsMessage{message, recipients, chargingAmount, reportDelivery, 0}
+		m := smsMessage{id, message, recipients, chargingAmount, reportDelivery, 0}
 		q.enqueueMessage(m)
 	}()
 }
 
-func (q *smsQueue) enqueueMessage(m smsMessage) {
+func (q *SMSQueue) enqueueMessage(m smsMessage) {
 	addrBlocks := splitAddrSlice(m.recipients, q.messagesPerSecond*q.client.MaxAddressCount)
 	for _, block := range addrBlocks {
 		nm := m
@@ -44,14 +45,14 @@ func (q *smsQueue) enqueueMessage(m smsMessage) {
 	}
 }
 
-func (q *smsQueue) requeueMessage(m smsMessage) {
+func (q *SMSQueue) requeueMessage(m smsMessage) {
 	if m.retries < q.maxRetryCount {
 		m.retries++
 		q.enqueueMessage(m)
 	}
 }
 
-func (q *smsQueue) sendMessage(m smsMessage) {
+func (q *SMSQueue) sendMessage(m smsMessage) {
 	responses, failures, err := q.client.SendTextMessage(m.message, m.recipients, m.chargingAmount, m.reportDelivery)
 	if err != nil {
 		q.requeueMessage(m)
@@ -61,17 +62,17 @@ func (q *smsQueue) sendMessage(m smsMessage) {
 		if responses[i].Error != nil && responses[i].Error.Retryable {
 			failures = append(failures, responses[i].Address)
 		} else {
-			go q.sentMessageCallbackFunc(m.message, responses[i].Address, responses[i].MessageID)
+			go q.sentMessageCallbackFunc(m.ID, m.message, responses[i].Address, responses[i].MessageID)
 		}
 	}
 	if len(failures) > 0 {
-		newM := smsMessage{m.message, failures, m.chargingAmount, m.reportDelivery, m.retries + 1}
+		newM := smsMessage{m.ID, m.message, failures, m.chargingAmount, m.reportDelivery, m.retries + 1}
 		q.requeueMessage(newM)
 	}
 }
 
 // Starts the SMS queue. This method should be called only once. Subsequent calls will not do anything.
-func (q *smsQueue) Start() {
+func (q *SMSQueue) Start() {
 	if q.started {
 		log.Print("SMS queue is already running.")
 		return
@@ -94,11 +95,11 @@ func (q *smsQueue) Start() {
 
 // Initializes and returns a new SMS queue.
 // Make sure that an application has only one queue if request throttling should be properly functional.
-func NewSMSQueue(client *SMSClient, capacity, messagesPerSecond, maxRetryCount int, sendCallback func(smsMessage, recipient, smsMessageId string)) smsQueue {
+func NewSMSQueue(client *SMSClient, capacity, messagesPerSecond, maxRetryCount int, sendCallback func(id, smsMessage, recipient, smsMessageId string)) SMSQueue {
 	if client == nil {
 		panic("SMS client is nil")
 	}
-	q := smsQueue{
+	q := SMSQueue{
 		channel:                 make(chan smsMessage, capacity),
 		maxRetryCount:           maxRetryCount,
 		messagesPerSecond:       messagesPerSecond,

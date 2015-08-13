@@ -17,6 +17,7 @@ const (
 	subscribeAction             = "1"
 	unsubscribeAction           = "0"
 	subscriptionTimestampFormat = "20060102150405"
+	subscriptionIDPrefix        = "tel:" // This is sent in all calls except the subscription status notification.
 )
 
 // The Subscription service client.
