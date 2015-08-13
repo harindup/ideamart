@@ -111,13 +111,16 @@ func (client *USSDClient) HandleIncoming(res http.ResponseWriter, req *http.Requ
 			USSDOperation:      responseType,
 			DestinationAddress: session.RemoteAddress,
 		}
+		if client.LogRequestDuration {
+			log.Printf("Request processing duration: %v\n", time.Since(tBegin))
+		}
 		resp := USSDMobileTerminatedResponse{}
 		err = doRequest(client.SendEndpoint, ussdResp, &resp)
 		if err != nil {
 			log.Print(err)
 		}
 		if client.LogRequestDuration {
-			log.Printf("Request time: %v\n", time.Since(tBegin))
+			log.Printf("Request duration: %v\n", time.Since(tBegin))
 		}
 		if resp.StatusCode != statusCodeSuccess {
 			log.Print(apiErrorFromCode(resp.StatusCode), resp)
